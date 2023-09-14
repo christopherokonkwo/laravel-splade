@@ -392,6 +392,13 @@ class ServiceProvider extends BaseServiceProvider
             });
         });
 
+         ComponentAttributeBag::macro('classHas', function ($value) {
+            /** @var ComponentAttributeBag $this */
+            $classes = explode(' ', Arr::toCssClasses($this->get('class')));
+
+            return in_array($value, $classes);
+        });
+
         ComponentAttributeBag::macro('mergeVueBinding', function ($attribute, $value, bool $omitBlankValue = true, bool $escape = true) {
             /** @var ComponentAttributeBag $this */
             if ($omitBlankValue && blank($value)) {
