@@ -60,6 +60,8 @@ class SpladeCore
 
     private Head $head;
 
+    private $frontendTimezone;
+
     private $customToastFactory;
 
     private array $dataStores = [];
@@ -620,5 +622,17 @@ class SpladeCore
     public function getDefaultModalCloseExplicitly(): bool
     {
         return $this->defaultModalCloseExplicitly;
+    }
+
+    public function setFrontendTimezone($value): self
+    {
+        $this->frontendTimezone = $value;
+
+        return $this;
+    }
+
+    public function getFrontendTimezone(): string
+    {
+        return $this->frontendTimezone ? value($this->frontendTimezone) : config('app.timezone');
     }
 }
