@@ -185,6 +185,35 @@ class SpladeQueryBuilder extends SpladeTable
         });
     }
 
+    private function applyDateRangeConstraint(string $column, string $terms)
+    {
+        $builder = $this->builder;
+
+        $splitted = Collection::make(explode(' ', $terms));
+
+        $timezone = Splade::getFrontendTimezone();
+
+        $appTimezone = config('app.timezone');
+
+        $dates = [
+            Carbon::parse($splitted->first(), $timezone)->startOfDay()->timezone($appTimezone),
+            Carbon::parse($splitted->last(), $timezone)->endOfDay()->timezone($appTimezone),
+        ];
+
+        if (!Str::contains($column, '.')) {
+            // Not a relationship, but a column on the table.
+            return $builder->whereBetween($builder->qualifyColumn($column), $dates);
+        }
+
+        // Split the column into the relationship name and the key on the relationship.
+        $relation = Str::beforeLast($column, '.');
+        $key      = Str::afterLast($column, '.');
+
+        $builder->whereHas($relation, function (EloquentBuilder $relation) use ($key, $dates) {
+            return $relation->whereBetween($relation->qualifyColumn($key), $dates);
+        });
+    }
+
     /**
      * Adds an "order by" clause to the query. If the query needs
      * to be sorted by a (nested) relationship, it will
@@ -233,9 +262,17 @@ class SpladeQueryBuilder extends SpladeTable
         $this->ignoreCase(false);
         $this->parseTerms(false);
 
-        $this->filters()->filter->hasValue()->each(
-            fn (Filter $filter) => $this->applyConstraint([$filter->key => SearchInput::EXACT], $filter->value)
-        );
+        // $this->filters()->filter->hasValue()->each(
+        //     fn (Filter $filter) => $this->applyConstraint([$filter->key => SearchInput::EXACT], $filter->value)
+        // );
+        $this->filters()->filter->hasValue()->each(function (Filter $filter) {
+            match ($filter->type) {
+                Filter::TYPE_DATE_RANGE => $this->applyDateRangeConstraint($filter->key, $filter->value),
+                Filter::TYPE_SELECT     => $this->applyConstraint([$filter->key => SearchInput::EXACT], $filter->value),
+
+                default => throw new Exception("Invalid filter type"),
+            };
+        });
 
         $this->ignoreCase($ignoreCaseSetting);
         $this->parseTerms($parseTermsSetting);
