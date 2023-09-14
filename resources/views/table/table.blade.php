@@ -8,6 +8,7 @@
     :base-url="@js(request()->url())"
     :pagination-scroll="@js($paginationScroll)"
     :splade-id="@js($spladeId = $table->getSpladeId())"
+    :filter-values="@js($table->filterValues())"
 >
     <template #default="{!! $scope !!}">
         <div {{ $attributes->only('class') }} :class="{ 'opacity-50': table.isLoading }" data-splade-id="{{ $spladeId }}">
