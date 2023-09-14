@@ -272,7 +272,7 @@ export default {
                     this.$emit("change", this.values);
                     
                     if(this.submitOnChange === true){
-                       this.debounce ? this.debounceFunction() : this.request(this.background));
+                       this.debounce ? this.debounceFunction() : this.request(this.background);
                     }
                 });
             }, { deep: true });
