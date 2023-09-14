@@ -67,7 +67,15 @@ export default {
             type: String,
             required: false,
             default: "top"
-        }
+        },
+        
+         filterValues: {
+            type: Object,
+            required: false,
+            default() {
+                return {};
+            }
+        },
     },
 
     data() {
@@ -77,7 +85,8 @@ export default {
             forcedVisibleSearchInputs: [],
             debounceUpdateQuery: null,
             isLoading: false,
-            processingAction: false
+            processingAction: false,
+            preventReload: false,
         };
     },
 
@@ -183,6 +192,14 @@ export default {
     },
 
     methods: {
+         updateFilterValues(values) {
+            forOwn(values, (value, key) => {
+                if(this.filterValues[key] != value) {
+                    this.updateQuery(`filter[${key}]`, value);
+                }
+            });
+        },
+        
         navigate(url, isPagination) {
             const headers = {
                 "X-Splade-Modal": Splade.stackType(this.stack),
@@ -417,6 +434,8 @@ export default {
                     queryString += "&";
                 }
 
+                value=encodeURIComponent(value);
+                
                 queryString += `${key}=${value}`;
             });
 
@@ -545,6 +564,7 @@ export default {
             performBulkAction: this.performBulkAction,
             processingAction: this.processingAction,
             isLoading: this.isLoading,
+            updateFilterValues: this.updateFilterValues,
         });
     },
 };
