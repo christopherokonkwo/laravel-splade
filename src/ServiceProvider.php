@@ -2,6 +2,7 @@
 
 namespace ProtoneMedia\Splade;
 
+use Illuminate\Support\Arr;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
