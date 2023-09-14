@@ -2,6 +2,7 @@
 
 namespace ProtoneMedia\Splade;
 
+use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\PostgresConnection;
