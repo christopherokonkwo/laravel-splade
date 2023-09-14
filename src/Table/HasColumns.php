@@ -57,6 +57,7 @@ trait HasColumns
         array|string $classes = null,
         callable $as = null,
         string $alignment = 'left',
+        bool $numeric = false,
     ): self {
         $key   = $key   !== null ? $key : Str::kebab($label);
         $label = $label !== null ? $label : Str::headline(str_replace('.', ' ', $key));
@@ -85,6 +86,7 @@ trait HasColumns
             classes: $classes,
             as: $as,
             alignment: $alignment,
+            numeric: $numeric,
         ))->values();
 
         if (!$searchable) {
