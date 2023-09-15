@@ -263,6 +263,28 @@ export default {
         this.missingAttributes = [];
 
         // Create watchers
+        if(this.submitOnChange === true) {
+            this.$watch("values", () => {
+                if(this.background) {
+                    this.processingInBackground = true;
+                }
+
+                this.$nextTick(() => {
+                    this.$emit("change", this.values);
+                    this.debounce ? this.debounceFunction() : this.request(this.background)
+                });
+            }, { deep: true });
+        }else if(isArray(this.submitOnChange)) {
+            this.submitOnChange.forEach((key) => {
+                this.$watch(`values.${key}`, () => {
+                    if(this.background) {
+                        this.processingInBackground = true;
+                    }
+
+                    this.$nextTick(() => this.debounce ? this.debounceFunction() : this.request(this.background));
+                }, { deep: true });
+            });
+        }
             this.$watch("values", () => {
                 if(this.background) {
                     this.processingInBackground = true;
@@ -276,18 +298,6 @@ export default {
                     }
                 });
             }, { deep: true });
-        
-        if(isArray(this.submitOnChange)) {
-            this.submitOnChange.forEach((key) => {
-                this.$watch(`values.${key}`, () => {
-                    if(this.background) {
-                        this.processingInBackground = true;
-                    }
-
-                    this.$nextTick(() => this.debounce ? this.debounceFunction() : this.request(this.background));
-                }, { deep: true });
-            });
-        }
 
         this.isMounted = true;
 
