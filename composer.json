@@ -20,6 +20,7 @@
         "illuminate/contracts": "^10.48.2|^11.0.1"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.54",
         "laravel/pint": "^1.0",
         "nunomaduro/collision": "^7.10|^8.1",
         "nunomaduro/larastan": "^2.0.1",

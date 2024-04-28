@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use ProtoneMedia\Splade\Facades\Splade;
+use Illuminate\Support\HtmlString;
 use ProtoneMedia\Splade\Facades\Toast;
+use ProtoneMedia\Splade\Facades\Splade;
 
 class ToastController
 {
@@ -31,8 +32,8 @@ class ToastController
 
     public function infoLeftCenter()
     {
-        Toast::title('Info Left Center')
-            ->message('This is a message')
+        Toast::title(new HtmlString('Info Left Center'))
+            ->message(new HtmlString('This is a message'))
             ->info()
             ->leftCenter();
 

@@ -226,9 +226,9 @@ export default {
                 return;
             }
 
-            if(!this.handlesExistingFiles) {
-                return;
-            }
+            // if(!this.handlesExistingFiles) {
+            //     return;
+            // }
 
             if(!this.filepondInstance) {
                 return;

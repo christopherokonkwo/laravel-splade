@@ -8,6 +8,7 @@ use Illuminate\Foundation\Exceptions\Handler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use ProtoneMedia\Splade\Facades\Splade;
@@ -18,31 +19,31 @@ use Traversable;
 
 class SpladeCore
 {
-    const HEADER_SPLADE = 'X-Splade';
+    public const HEADER_SPLADE = 'X-Splade';
 
-    const HEADER_MODAL = 'X-Splade-Modal';
+    public const HEADER_MODAL = 'X-Splade-Modal';
 
-    const HEADER_MODAL_TARGET = 'X-Splade-Modal-Target';
+    public const HEADER_MODAL_TARGET = 'X-Splade-Modal-Target';
 
-    const HEADER_PREVENT_REFRESH = 'X-Splade-Prevent-Refresh';
+    public const HEADER_PREVENT_REFRESH = 'X-Splade-Prevent-Refresh';
 
-    const HEADER_PRESERVE_SCROLL = 'X-Splade-Preserve-Scroll';
+    public const HEADER_PRESERVE_SCROLL = 'X-Splade-Preserve-Scroll';
 
-    const HEADER_LAZY = 'X-Splade-Lazy';
+    public const HEADER_LAZY = 'X-Splade-Lazy';
 
-    const HEADER_REHYDRATE = 'X-Splade-Rehydrate';
+    public const HEADER_REHYDRATE = 'X-Splade-Rehydrate';
 
-    const HEADER_REDIRECT_AWAY = 'X-Splade-Redirect-Away';
+    public const HEADER_REDIRECT_AWAY = 'X-Splade-Redirect-Away';
 
-    const HEADER_REFRESH = 'X-Splade-Refresh';
+    public const HEADER_REFRESH = 'X-Splade-Refresh';
 
-    const HEADER_SKIP_MIDDLEWARE = 'X-Splade-Skip-Middleware';
+    public const HEADER_SKIP_MIDDLEWARE = 'X-Splade-Skip-Middleware';
 
-    const MODAL_TYPE_MODAL = 'modal';
+    public const MODAL_TYPE_MODAL = 'modal';
 
-    const MODAL_TYPE_SLIDEOVER = 'slideover';
+    public const MODAL_TYPE_SLIDEOVER = 'slideover';
 
-    const HEADER_PREVENT_VIEW_TRANSITION = 'X-Splade-Prevent-View-Transition';
+    public const HEADER_PREVENT_VIEW_TRANSITION = 'X-Splade-Prevent-View-Transition';
 
     private string $modalKey;
 
@@ -60,8 +61,6 @@ class SpladeCore
 
     private Head $head;
 
-    private $frontendTimezone;
-
     private $customToastFactory;
 
     private array $dataStores = [];
@@ -77,7 +76,7 @@ class SpladeCore
      */
     public function __construct(private $requestResolver)
     {
-        $this->head = new Head;
+        $this->head = new Head();
     }
 
     /**
@@ -119,8 +118,6 @@ class SpladeCore
 
     /**
      * Getter for the Head instance.
-     *
-     * @return \ProtoneMedia\Splade\Head
      */
     public function head(): Head
     {
@@ -271,18 +268,14 @@ class SpladeCore
 
     /**
      * Returns a new EventRefresh instance.
-     *
-     * @return \ProtoneMedia\Splade\EventRefresh
      */
     public static function refreshOnEvent(): EventRefresh
     {
-        return new EventRefresh;
+        return new EventRefresh();
     }
 
     /**
      * Returns a new EventRedirectFactory instance.
-     *
-     * @return \ProtoneMedia\Splade\EventRedirectFactory
      */
     public static function redirectOnEvent(): EventRedirectFactory
     {
@@ -291,8 +284,6 @@ class SpladeCore
 
     /**
      * Returns a new instance of the ToastBuilder.
-     *
-     * @return \ProtoneMedia\Splade\SpladeToastBuilder
      */
     public function toastBuilder(): SpladeToastBuilder
     {
@@ -301,10 +292,8 @@ class SpladeCore
 
     /**
      * Returns a new SpladeToast instance
-     *
-     * @return \ProtoneMedia\Splade\SpladeToast
      */
-    public static function toastOnEvent(string $message = ''): SpladeToast
+    public static function toastOnEvent(HtmlString|string $message = ''): SpladeToast
     {
         $newToast = new SpladeToast($message);
 
@@ -312,20 +301,14 @@ class SpladeCore
             call_user_func($factory, $newToast);
         }
 
-        if (trim($message) !== '') {
-            $newToast->message($message);
-        }
-
-        return $newToast;
+        return $newToast->message($message);
     }
 
     /**
      * Returns a Closure that prevents generating a response from
      * a ValidationException when this is a Splade request.
-     *
-     * @param  callable  $renderUsing
      */
-    public static function exceptionHandler(Handler $exceptionHandler, callable $renderUsing = null): Closure
+    public static function exceptionHandler(Handler $exceptionHandler, ?callable $renderUsing = null): Closure
     {
         return Closure::bind(function (Throwable $e, $request) use ($renderUsing) {
             if ($renderUsing) {
@@ -346,7 +329,7 @@ class SpladeCore
                 if ($e instanceof AuthenticationException) {
                     // Still use request()->guest() so the "indented" URL is preserved.
                     return Splade::redirectAway(
-                        redirect()->guest($e->redirectTo() ?? route('login'))->getTargetUrl()
+                        redirect()->guest($e->redirectTo($request) ?? route('login'))->getTargetUrl()
                     );
                 }
 
@@ -358,8 +341,6 @@ class SpladeCore
     /**
      * Returns a new SpladeToast instance, optionally with the given message
      * if it isn't empty, and it uses the custom toast factory if set.
-     *
-     * @return \ProtoneMedia\Splade\SpladeToast
      */
     public function toast(string $message = ''): SpladeToast
     {
@@ -394,8 +375,6 @@ class SpladeCore
 
     /**
      * Adds a new Data Store.
-     *
-     * @param  \ProtoneMedia\Splade\DataStore  $store
      */
     public function addDataStore(DataStore $store): self
     {
@@ -622,17 +601,5 @@ class SpladeCore
     public function getDefaultModalCloseExplicitly(): bool
     {
         return $this->defaultModalCloseExplicitly;
-    }
-
-    public function setFrontendTimezone($value): self
-    {
-        $this->frontendTimezone = $value;
-
-        return $this;
-    }
-
-    public function getFrontendTimezone(): string
-    {
-        return $this->frontendTimezone ? value($this->frontendTimezone) : config('app.timezone');
     }
 }
