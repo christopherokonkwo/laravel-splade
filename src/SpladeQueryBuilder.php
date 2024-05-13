@@ -194,13 +194,13 @@ class SpladeQueryBuilder extends SpladeTable
 
         $splitted = Collection::make(explode(' ', $terms));
 
-        $timezone = Splade::getFrontendTimezone();
+        // $timezone = Splade::getFrontendTimezone();
 
         $appTimezone = config('app.timezone');
 
         $dates = [
-            Carbon::parse($splitted->first(), $timezone)->startOfDay()->timezone($appTimezone),
-            Carbon::parse($splitted->last(), $timezone)->endOfDay()->timezone($appTimezone),
+            Carbon::parse($splitted->first())->startOfDay()->timezone($appTimezone),
+            Carbon::parse($splitted->last())->endOfDay()->timezone($appTimezone),
         ];
 
         if (!Str::contains($column, '.')) {
