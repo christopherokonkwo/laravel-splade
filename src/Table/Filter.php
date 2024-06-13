@@ -7,8 +7,8 @@ use Illuminate\Support\Arr;
 
 class Filter implements Arrayable
 {
-    const TYPE_DATE_RANGE = 'date_range';
-    const TYPE_SELECT     = 'select';
+    public const TYPE_DATE_RANGE = 'date_range';
+    public const TYPE_SELECT     = 'select';
     /**
      * This class represents a filter in a Splade Table.
      */
@@ -19,7 +19,8 @@ class Filter implements Arrayable
         public ?string $value,
         public bool $noFilterOption,
         public string $noFilterOptionLabel,
-        public string $type
+        public string $type,
+        public ?string $timezone
     ) {
     }
 
@@ -35,7 +36,8 @@ class Filter implements Arrayable
             $this->value,
             $this->noFilterOption,
             $this->noFilterOptionLabel,
-            $this->type
+            $this->type,
+            $this->timezone
         );
     }
 

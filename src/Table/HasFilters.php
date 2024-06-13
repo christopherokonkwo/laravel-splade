@@ -31,7 +31,8 @@ trait HasFilters
             value: $defaultValue,
             noFilterOption: $noFilterOption,
             noFilterOptionLabel: $noFilterOptionLabel ?: '-',
-            type: Filter::TYPE_SELECT
+            type: Filter::TYPE_SELECT,
+            timezone: null
         ))->values();
 
         return $this;
@@ -49,6 +50,7 @@ trait HasFilters
         string $key,
         string $label = null,
         string $defaultValue = null,
+        string $timezone = null
     ): self {
         $this->filters = $this->filters->reject(function (Filter $filter) use ($key) {
             return $filter->key === $key;
@@ -59,7 +61,8 @@ trait HasFilters
             value: $defaultValue,
             noFilterOption: false,
             noFilterOptionLabel: '',
-            type: Filter::TYPE_DATE_RANGE
+            type: Filter::TYPE_DATE_RANGE,
+            timezone: $timezone
         ))->values();
 
         return $this;
@@ -102,11 +105,11 @@ trait HasFilters
         return $this->filters()->reject(fn (Filter $filter) => is_null($filter->value))->isNotEmpty();
     }
 
-     /**
-     * Returns a key-value array of all filters.
-     *
-     * @return array
-     */
+    /**
+    * Returns a key-value array of all filters.
+    *
+    * @return array
+    */
     public function filterValues(): array
     {
         return $this->filters()

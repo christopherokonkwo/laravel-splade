@@ -188,7 +188,7 @@ class SpladeQueryBuilder extends SpladeTable
         });
     }
 
-    private function applyDateRangeConstraint(string $column, string $terms)
+    private function applyDateRangeConstraint(string $column, string $terms, ?string $timezone = null)
     {
         $builder = $this->builder;
 
@@ -199,8 +199,8 @@ class SpladeQueryBuilder extends SpladeTable
         $appTimezone = config('app.timezone');
 
         $dates = [
-            Carbon::parse($splitted->first())->startOfDay()->timezone($appTimezone),
-            Carbon::parse($splitted->last())->endOfDay()->timezone($appTimezone),
+            Carbon::parse($splitted->first(), $timezone)->startOfDay()->timezone($appTimezone),
+            Carbon::parse($splitted->last(), $timezone)->endOfDay()->timezone($appTimezone),
         ];
 
         if (!Str::contains($column, '.')) {
@@ -270,7 +270,7 @@ class SpladeQueryBuilder extends SpladeTable
         // );
         $this->filters()->filter->hasValue()->each(function (Filter $filter) {
             match ($filter->type) {
-                Filter::TYPE_DATE_RANGE => $this->applyDateRangeConstraint($filter->key, $filter->value),
+                Filter::TYPE_DATE_RANGE => $this->applyDateRangeConstraint($filter->key, $filter->value, $filter->timezone),
                 Filter::TYPE_SELECT     => $this->applyConstraint([$filter->key => SearchInput::EXACT], $filter->value),
 
                 default => throw new Exception("Invalid filter type"),
