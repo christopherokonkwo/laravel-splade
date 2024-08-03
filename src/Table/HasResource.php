@@ -11,6 +11,8 @@ trait HasResource
 {
     public $resource = [];
 
+    public $aggregates = [];
+
     public $rowLinkCallable;
 
     public Collection $rowLinks;

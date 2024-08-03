@@ -9,13 +9,13 @@ use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Query\Builder as BaseQueryBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 use Kirschbaum\PowerJoins\PowerJoins;
+use ProtoneMedia\Splade\Facades\Splade;
 use ProtoneMedia\Splade\Table\Column;
 use ProtoneMedia\Splade\Table\Filter;
-use ProtoneMedia\Splade\Facades\Splade;
 use ProtoneMedia\Splade\Table\PowerJoinsException;
 use ProtoneMedia\Splade\Table\SearchInput;
 use Spatie\QueryBuilder\QueryBuilder as SpatieQueryBuilder;
@@ -171,14 +171,14 @@ class SpladeQueryBuilder extends SpladeTable
                 Collection::wrap($columns)->each(function (?string $searchMethod, string $column) use ($builder, $term) {
                     [$term, $whereOperator] = $this->getTermAndWhereOperator($builder, $term, $searchMethod);
 
-                    if (!Str::contains($column, '.')) {
+                    if (! Str::contains($column, '.')) {
                         // Not a relationship, but a column on the table.
                         return $builder->orWhere($builder->qualifyColumn($column), $whereOperator, $term);
                     }
 
                     // Split the column into the relationship name and the key on the relationship.
                     $relation = Str::beforeLast($column, '.');
-                    $key      = Str::afterLast($column, '.');
+                    $key = Str::afterLast($column, '.');
 
                     $builder->orWhereHas($relation, function (EloquentBuilder $relation) use ($key, $whereOperator, $term) {
                         return $relation->where($relation->qualifyColumn($key), $whereOperator, $term);
@@ -203,14 +203,14 @@ class SpladeQueryBuilder extends SpladeTable
             Carbon::parse($splitted->last(), $timezone)->endOfDay()->timezone($appTimezone),
         ];
 
-        if (!Str::contains($column, '.')) {
+        if (! Str::contains($column, '.')) {
             // Not a relationship, but a column on the table.
             return $builder->whereBetween($builder->qualifyColumn($column), $dates);
         }
 
         // Split the column into the relationship name and the key on the relationship.
         $relation = Str::beforeLast($column, '.');
-        $key      = Str::afterLast($column, '.');
+        $key = Str::afterLast($column, '.');
 
         $builder->whereHas($relation, function (EloquentBuilder $relation) use ($key, $dates) {
             return $relation->whereBetween($relation->qualifyColumn($key), $dates);
@@ -230,18 +230,18 @@ class SpladeQueryBuilder extends SpladeTable
             return ($column->sortable)($this->builder, $column->sorted);
         }
 
-        if (!$column->isNested()) {
+        if (! $column->isNested()) {
             // Not a relationship, just a column on the table.
             return $this->builder->orderBy($column->key, $column->sorted);
         }
 
-        if (!trait_exists(PowerJoins::class)) {
+        if (! trait_exists(PowerJoins::class)) {
             throw new PowerJoinsException(
                 "To order the query using a column from a relationship, please install the 'kirschbaum-development/eloquent-power-joins' package."
             );
         }
 
-        if (!method_exists($this->builder->getModel(), 'scopeOrderByLeftPowerJoins')) {
+        if (! method_exists($this->builder->getModel(), 'scopeOrderByLeftPowerJoins')) {
             throw new PowerJoinsException(
                 "To order the query using a column from a relationship, make sure the Model uses the 'PowerJoins' trait."
             );
@@ -273,7 +273,7 @@ class SpladeQueryBuilder extends SpladeTable
                 Filter::TYPE_DATE_RANGE => $this->applyDateRangeConstraint($filter->key, $filter->value, $filter->timezone),
                 Filter::TYPE_SELECT     => $this->applyConstraint([$filter->key => SearchInput::EXACT], $filter->value),
 
-                default => throw new Exception("Invalid filter type"),
+                default => throw new Exception('Invalid filter type'),
             };
         });
 
@@ -321,7 +321,7 @@ class SpladeQueryBuilder extends SpladeTable
      */
     private function loadResults()
     {
-        if (!$this->paginateMethod) {
+        if (! $this->paginateMethod) {
             // No pagination, so get all results.
             return $this->resource = $this->builder->get();
         }
@@ -333,11 +333,16 @@ class SpladeQueryBuilder extends SpladeTable
 
         $perPage = $this->query('perPage', $defaultPerPage);
 
-        if (!in_array($perPage, $this->perPageOptions)) {
+        if (! in_array($perPage, $this->perPageOptions)) {
             // The 'perPage' value is not in the allowed options.
             // So we'll use the first option.
             $perPage = $defaultPerPage;
         }
+
+        // This exposes the eloquent builder for custom
+        // aggregated calls
+        $this->aggregates = $this->builder->clone();
+        $this->aggregates->limit(null);
 
         $this->resource = $this->builder->{$this->paginateMethod}($perPage)->withQueryString();
     }
@@ -349,7 +354,7 @@ class SpladeQueryBuilder extends SpladeTable
      */
     public function addCurrentPerPageValueToOptions()
     {
-        if ($this->perPage && !in_array($this->perPage, $this->perPageOptions)) {
+        if ($this->perPage && ! in_array($this->perPage, $this->perPageOptions)) {
             $this->perPageOptions[] = $this->perPage;
         }
     }
@@ -365,7 +370,7 @@ class SpladeQueryBuilder extends SpladeTable
             return $this;
         }
 
-        if (!$this->builder instanceof SpatieQueryBuilder) {
+        if (! $this->builder instanceof SpatieQueryBuilder) {
             $this->applyFilters();
             $this->applySearchInputs();
             $this->applySortingAndEagerLoading();
@@ -382,7 +387,7 @@ class SpladeQueryBuilder extends SpladeTable
      */
     public function getBuilderForExport(): BaseQueryBuilder|EloquentBuilder|SpatieQueryBuilder
     {
-        if (!$this->builder instanceof SpatieQueryBuilder) {
+        if (! $this->builder instanceof SpatieQueryBuilder) {
             $this->applyFilters();
             $this->applySearchInputs();
             $this->applySortingAndEagerLoading();
@@ -395,7 +400,7 @@ class SpladeQueryBuilder extends SpladeTable
     {
         $shouldApplyFiltersAndSearchInputs = false;
 
-        if (!$this->builder instanceof SpatieQueryBuilder) {
+        if (! $this->builder instanceof SpatieQueryBuilder) {
             $shouldApplyFiltersAndSearchInputs = true;
 
             $this->applySortingAndEagerLoading();

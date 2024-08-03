@@ -58,8 +58,9 @@ trait HasColumns
         callable $as = null,
         string $alignment = 'left',
         bool $numeric = false,
+        bool $canSum = false,
     ): self {
-        $key   = $key   !== null ? $key : Str::kebab($label);
+        $key = $key !== null ? $key : Str::kebab($label);
         $label = $label !== null ? $label : Str::headline(str_replace('.', ' ', $key));
 
         $highlight = is_bool($highlight)
@@ -87,9 +88,10 @@ trait HasColumns
             as: $as,
             alignment: $alignment,
             numeric: $numeric,
+            canSum: $canSum
         ))->values();
 
-        if (!$searchable) {
+        if (! $searchable) {
             return $this;
         }
 
@@ -124,8 +126,8 @@ trait HasColumns
 
             $queryColumns = $this->query('columns', []);
 
-            if (!empty($queryColumns) && $column->canBeHidden) {
-                $cloned->hidden = !in_array($column->key, $queryColumns);
+            if (! empty($queryColumns) && $column->canBeHidden) {
+                $cloned->hidden = ! in_array($column->key, $queryColumns);
             }
 
             return $cloned;
@@ -138,7 +140,7 @@ trait HasColumns
     public function defaultVisibleToggleableColumns(): array
     {
         return $this->columns
-            ->filter(fn (Column $column) => !$column->canBeHidden || ($column->canBeHidden && !$column->hidden))
+            ->filter(fn (Column $column) => ! $column->canBeHidden || ($column->canBeHidden && ! $column->hidden))
             ->map->key
             ->sort()
             ->values()

@@ -31,6 +31,7 @@ class Column implements Arrayable
         public ?Closure $as = null,
         public string $alignment = 'left',
         public $numeric = false,
+        public $canSum = false,
     ) {
         if (is_array($classes)) {
             $classes = Arr::flatten($classes);
@@ -59,6 +60,7 @@ class Column implements Arrayable
             $this->as,
             $this->alignment,
             $this->numeric,
+            $this->canSum,
         );
     }
 
@@ -102,7 +104,7 @@ class Column implements Arrayable
         }
 
         return data_get($item, $this->key, function () use ($item) {
-            if (!is_object($item)) {
+            if (! is_object($item)) {
                 return null;
             }
 
